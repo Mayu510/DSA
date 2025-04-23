@@ -1,0 +1,96 @@
+# Hash function
+def simple_hash(key, size):
+    return hash(key) % size
+
+# 1. Hash Table using Chaining
+class HashTableChaining:
+    def __init__(self, size):
+        self.size = size
+        self.table = [[] for _ in range(size)]
+
+    def insert(self, name, number):
+        index = simple_hash(name, self.size)
+        for i, (n, _) in enumerate(self.table[index]):
+            if n == name:
+                self.table[index][i] = (name, number)
+                return
+        self.table[index].append((name, number))
+
+    def search(self, name):
+        index = simple_hash(name, self.size)
+        comparisons = 0
+        for n, number in self.table[index]:
+            comparisons += 1
+            if n == name:
+                return number, comparisons
+        return None, comparisons
+
+# 2. Hash Table using Linear Probing
+class HashTableLinearProbing:
+    def __init__(self, size):
+        self.size = size
+        self.table = [None] * size
+
+    def insert(self, name, number):
+        index = simple_hash(name, self.size)
+        for i in range(self.size):
+            idx = (index + i) % self.size
+            if self.table[idx] is None or self.table[idx][0] == name:
+                self.table[idx] = (name, number)
+                return
+
+    def search(self, name):
+        index = simple_hash(name, self.size)
+        comparisons = 0
+        for i in range(self.size):
+            idx = (index + i) % self.size
+            comparisons += 1
+            if self.table[idx] is None:
+                return None, comparisons
+            if self.table[idx][0] == name:
+                return self.table[idx][1], comparisons
+        return None, comparisons
+
+# Main function with user input
+def main():
+    size = 20  # table size
+    chain_ht = HashTableChaining(size)
+    probe_ht = HashTableLinearProbing(size)
+
+    n = int(input("Enter the number of clients: "))
+    print("Enter client details (Name and Phone Number):")
+    for _ in range(n):
+        name = input("Name: ")
+        number = input("Phone Number: ")
+        chain_ht.insert(name, number)
+        probe_ht.insert(name, number)
+
+    m = int(input("\nEnter the number of names to search: "))
+    print("\nSearching...")
+    print("Name\tChaining Comparisons\tLinear Probing Comparisons")
+    for _ in range(m):
+        name = input("Name to search: ")
+        _, chain_comp = chain_ht.search(name)
+        _, probe_comp = probe_ht.search(name)
+        print(f"{name}\t{chain_comp}\t\t\t{probe_comp}")
+
+main()
+
+
+
+O/P:Enter the number of clients: 3
+Name: Alice
+Phone Number: 1234
+Name: Bob
+Phone Number: 5678
+Name: Charlie
+Phone Number: 9012
+
+Enter the number of names to search: 2
+Name to search: Alice
+Name to search: Eve
+
+Name    Chaining Comparisons    Linear Probing Comparisons
+Alice   1                       1
+Eve     0                       4
+

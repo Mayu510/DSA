@@ -1,0 +1,99 @@
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+// Node structure for expression tree
+struct Node {
+    char data;
+    Node* left;
+    Node* right;
+
+    Node(char val) {
+        data = val;
+        left = right = nullptr;
+    }
+};
+
+// Check if a character is an operator
+bool isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+
+// Build expression tree from prefix expression
+Node* buildExpressionTree(const string& prefix) {
+    stack<Node*> st;
+
+    // Process prefix from right to left
+    for (int i = prefix.length() - 1; i >= 0; --i) {
+        char ch = prefix[i];
+        Node* newNode = new Node(ch);
+
+        if (isOperator(ch)) {
+            // Operator must have two children
+            if (st.size() < 2) {
+                cout << "Invalid expression!\n";
+                return nullptr;
+            }
+            newNode->left = st.top(); st.pop();
+            newNode->right = st.top(); st.pop();
+        }
+
+        st.push(newNode);
+    }
+
+    if (st.size() != 1) {
+        cout << "Invalid expression!\n";
+        return nullptr;
+    }
+
+    return st.top();
+}
+
+// Non-recursive postorder traversal
+void postorderTraversal(Node* root) {
+    if (root == nullptr) return;
+
+    stack<Node*> s1, s2;
+    s1.push(root);
+
+    while (!s1.empty()) {
+        Node* node = s1.top(); s1.pop();
+        s2.push(node);
+
+        if (node->left) s1.push(node->left);
+        if (node->right) s1.push(node->right);
+    }
+
+    cout << "Postorder Traversal: ";
+    while (!s2.empty()) {
+        cout << s2.top()->data;
+        s2.pop();
+    }
+    cout << endl;
+}
+
+// Delete the entire tree
+void deleteTree(Node* root) {
+    if (root == nullptr) return;
+    deleteTree(root->left);
+    deleteTree(root->right);
+    delete root;
+}
+
+int main() {
+    string prefix;
+
+    cout << "Enter prefix expression (e.g., +--a*bc/def): ";
+    cin >> prefix;
+
+    Node* root = buildExpressionTree(prefix);
+
+    if (root) {
+        postorderTraversal(root);
+        deleteTree(root);
+        cout << "Tree deleted successfully.\n";
+    }
+
+    return 0;
+}
